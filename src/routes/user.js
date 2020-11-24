@@ -11,5 +11,6 @@ router
     .post('/pin', authentication, userController.checkPin)
     .post('/upload', upload, authentication, userController.editPhoto)
     .patch('/', upload, authentication, userController.editUser)
+    .patch('/device', authentication, userController.deleteDevice)
     
 module.exports = router

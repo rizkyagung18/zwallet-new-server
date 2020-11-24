@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const http = require('http')
+const socketio = require('socket.io')
 const routeNav = require('./src/')
 const routeAdmin = require('./src/admin')
 require('dotenv').config()
@@ -14,6 +16,8 @@ admin.initializeApp({
 });
 
 const app = express()
+const server = http.createServer(app)
+const io = socketio(server)
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -24,6 +28,21 @@ app.use('/admin/api/v1', routeAdmin)
 
 app.use(express.static('public'))
 
-app.listen(process.env.PORT || 8000, () => { 
+io.on('connection', (socket) => {
+  console.log('socket connected')
+  const db = require('./src/config/mysql')
+  socket.on('user', (email) => {
+    if(email) {
+      socket.join(email)
+      db.query(`SELECT balance FROM users WHERE email='${email}'`, (err, res) => {
+        if(!err) {
+          io.to(email).emit('get-balance', res[0].balance)
+        }
+      })
+    }
+  })
+})
+
+server.listen(process.env.PORT || 8000, () => { 
     console.log('Server running')
 })

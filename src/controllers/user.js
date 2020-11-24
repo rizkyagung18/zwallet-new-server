@@ -4,6 +4,7 @@ const { checkUser } = require('../models/auth')
 const { updateHistoryReceiver, updateHistorySender} = require('../models/transfer')
 const { response } = require('../helpers')
 const aws = require('aws-sdk')
+const { deleteDevice } = require('../models/user')
 
 module.exports = {
     searchAll: async function(req, res) {
@@ -144,6 +145,14 @@ module.exports = {
             }
         } catch (error) {
             res.send(error.message)
+        }
+    },
+    deleteDevice: async function(req, res) {
+        try {
+            const { id } = req.token
+            await deleteDevice(id)
+        } catch (error) {
+            
         }
     }
 }
